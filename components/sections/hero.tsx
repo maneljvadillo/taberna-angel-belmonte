@@ -2,11 +2,27 @@
 
 import { ArrowDown, Clock, MapPin, Phone } from "lucide-react";
 
-import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
+import ScrollExpandMedia, {
+  type FotoHeroe,
+} from "@/components/ui/scroll-expansion-hero";
 import { site } from "@/lib/site";
 
 import fondo from "@/assets/media/comedor.webp";
-import mesa from "@/assets/media/gambas-rojas.webp";
+import gambas from "@/assets/media/gambas-rojas.webp";
+import cigalas from "@/assets/media/cigalas.webp";
+import tartarAtun from "@/assets/media/tartar-atun.webp";
+import solomilloFoie from "@/assets/media/solomillo-foie.webp";
+import navajas from "@/assets/media/navajas.webp";
+
+// Se van turnando con un fundido detrás del titular. Decorativas: los mismos
+// platos van descritos, uno a uno, en la galería.
+const fotos: FotoHeroe[] = [
+  { imagen: gambas, alt: "Gambas rojas a la plancha" },
+  { imagen: cigalas, alt: "Cigalas de la lonja abiertas a la plancha" },
+  { imagen: tartarAtun, alt: "Tartar de atún rojo coronado con caviar" },
+  { imagen: solomilloFoie, alt: "Solomillo con foie a la brasa" },
+  { imagen: navajas, alt: "Navajas a la plancha con ajo y perejil" },
+];
 
 const señas = [
   { icono: MapPin, texto: `${site.direccion.calle} · ${site.direccion.ciudad}` },
@@ -18,8 +34,7 @@ export function Hero() {
   return (
     <section id="inicio" aria-label="Presentación">
       <ScrollExpandMedia
-        mediaType="image"
-        mediaSrc={mesa}
+        fotos={fotos}
         bgImageSrc={fondo}
         title="Taberna Ángel Belmonte"
         date="Andorra la Vella · desde 2000"
