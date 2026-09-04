@@ -11,6 +11,12 @@
  * cubra una web nueva.
  */
 export const FOTOS_ORIGEN = {
+  // Sala y fachada. Ojo: su servidor entrega estas dos muy pequeñas
+  // (1164x655 y 550x413). La fachada, en particular, se queda corta para el
+  // fondo del héroe: si la taberna pasa el original de cámara, se sustituye
+  // el archivo en assets/originals/fachada.jpg y se relanza `npm run images`.
+  "barra-escalera": "https://tabernaangelbelmonte.com/wp-content/uploads/2024/04/contribution_gallery.jpg",
+  "fachada": "https://tabernaangelbelmonte.com/wp-content/uploads/2024/04/caption.jpg",
   "comedor": "https://tabernaangelbelmonte.com/wp-content/uploads/2024/04/203a8711-73fa-4f3c-8ab8-92b9f2850ecc.jpg",
   "tiramisu": "https://tabernaangelbelmonte.com/wp-content/uploads/2024/12/1718292920008.jpg",
   "fresas-helado": "https://tabernaangelbelmonte.com/wp-content/uploads/2024/12/1718292778024.jpg",

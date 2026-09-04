@@ -7,21 +7,16 @@ import ScrollExpandMedia, {
 } from "@/components/ui/scroll-expansion-hero";
 import { site } from "@/lib/site";
 
-import fondo from "@/assets/media/comedor.webp";
-import gambas from "@/assets/media/gambas-rojas.webp";
-import cigalas from "@/assets/media/cigalas.webp";
-import tartarAtun from "@/assets/media/tartar-atun.webp";
-import solomilloFoie from "@/assets/media/solomillo-foie.webp";
-import navajas from "@/assets/media/navajas.webp";
+import fachada from "@/assets/media/fachada.webp";
+import comedor from "@/assets/media/comedor.webp";
+import barraEscalera from "@/assets/media/barra-escalera.webp";
 
-// Se van turnando con un fundido detrás del titular. Decorativas: los mismos
-// platos van descritos, uno a uno, en la galería.
+// El héroe cuenta la entrada a la casa: de fondo la fachada, y al bajar se abre
+// el interior. Por eso aquí solo van fotos de sala, no de plato: los platos
+// tienen su sitio en la carta y en la galería.
 const fotos: FotoHeroe[] = [
-  { imagen: gambas, alt: "Gambas rojas a la plancha" },
-  { imagen: cigalas, alt: "Cigalas de la lonja abiertas a la plancha" },
-  { imagen: tartarAtun, alt: "Tartar de atún rojo coronado con caviar" },
-  { imagen: solomilloFoie, alt: "Solomillo con foie a la brasa" },
-  { imagen: navajas, alt: "Navajas a la plancha con ajo y perejil" },
+  { imagen: comedor, alt: "Comedor de paredes verdes con las mesas vestidas" },
+  { imagen: barraEscalera, alt: "La barra y la escalera a la planta de arriba" },
 ];
 
 const señas = [
@@ -35,7 +30,7 @@ export function Hero() {
     <section id="inicio" aria-label="Presentación">
       <ScrollExpandMedia
         fotos={fotos}
-        bgImageSrc={fondo}
+        bgImageSrc={fachada}
         title="Taberna Ángel Belmonte"
         date="Andorra la Vella · desde 2000"
         scrollToExpand="Desliza para entrar"
