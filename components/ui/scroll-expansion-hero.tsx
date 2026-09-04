@@ -53,8 +53,16 @@ interface ScrollExpandMediaProps {
   children?: ReactNode;
 }
 
-/** Alto del carril: 200vh deja 100vh de scroll para abrir la foto. */
-const ALTO_CARRIL = "200vh";
+/**
+ * Alto del carril: deja una pantalla entera de scroll para abrir la foto.
+ *
+ * En `dvh`, la misma unidad que el bloque `sticky` de dentro. Con `200vh` fuera
+ * y `100dvh` dentro no cuadraban en el móvil: `vh` mide la pantalla como si la
+ * barra de direcciones estuviera escondida y `dvh` mide la de verdad, así que el
+ * recorrido del carril y el alto del bloque discrepaban justo en el gesto en el
+ * que el navegador recoge la barra.
+ */
+const ALTO_CARRIL = "200dvh";
 
 /** Lo que tarda una foto en relevar a la anterior, en segundos. */
 const FUNDIDO = 1.2;
@@ -71,17 +79,21 @@ const ScrollExpandMedia = ({
   const carrilRef = useRef<HTMLDivElement | null>(null);
   const reducedMotion = useReducedMotion();
 
-  const [esMovil, setEsMovil] = useState(false);
+  const [ventana, setVentana] = useState({ ancho: 0, alto: 0 });
   const [indice, setIndice] = useState(0);
   const [saliente, setSaliente] = useState<number | null>(null);
   const anteriorRef = useRef(0);
 
   useEffect(() => {
-    const comprobar = () => setEsMovil(window.innerWidth < 768);
-    comprobar();
-    window.addEventListener("resize", comprobar);
-    return () => window.removeEventListener("resize", comprobar);
+    const medir = () =>
+      setVentana({ ancho: window.innerWidth, alto: window.innerHeight });
+
+    medir();
+    window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
   }, []);
+
+  const esMovil = ventana.ancho > 0 && ventana.ancho < 768;
 
   /**
    * Turno de fotos. Quien pide menos movimiento se queda con la primera.
@@ -138,8 +150,28 @@ const ScrollExpandMedia = ({
   const progresoFijo = useMotionValue(1);
   const progreso = reducedMotion ? progresoFijo : scrollYProgress;
 
-  const ancho = useTransform(progreso, [0, 1], [300, esMovil ? 950 : 1550]);
-  const alto = useTransform(progreso, [0, 1], [400, esMovil ? 600 : 800]);
+  /**
+   * Tamaño final de la foto, medido contra la ventana de verdad.
+   *
+   * Antes eran dos números fijos en píxeles con un tope de `95vw`. En una
+   * pantalla ancha daba igual, pero en un móvil de 375 px el tope entraba a los
+   * nueve centésimos del recorrido: a partir de ahí la foto ya no ensanchaba y
+   * el gesto terminaba con una tarjeta pequeña flotando en negro, en vez de
+   * abrirse a pantalla completa. En móvil ocupa la pantalla entera; en
+   * escritorio se deja margen para que se lea como una lámina y no como fondo.
+   */
+  const anchoFinal = esMovil
+    ? ventana.ancho
+    : Math.min(ventana.ancho * 0.95, 1550);
+  const altoFinal = esMovil
+    ? ventana.alto
+    : Math.min(ventana.alto * 0.85, 800);
+
+  const ancho = useTransform(progreso, [0, 1], [300, anchoFinal || 300]);
+  const alto = useTransform(progreso, [0, 1], [400, altoFinal || 400]);
+
+  // A pantalla completa las esquinas redondeadas dejarían cuatro muescas negras.
+  const radio = useTransform(progreso, [0.8, 1], [16, esMovil ? 0 : 16]);
 
   const opacidadFondo = useTransform(progreso, [0, 1], [1, 0]);
   const opacidadVelo = useTransform(progreso, [0, 1], [0.5, 0.1]);
@@ -192,12 +224,11 @@ const ScrollExpandMedia = ({
           </motion.div>
 
           <motion.div
-            className="absolute z-0 overflow-hidden rounded-2xl"
+            className="absolute z-0 overflow-hidden"
             style={{
               width: ancho,
               height: alto,
-              maxWidth: "95vw",
-              maxHeight: "85vh",
+              borderRadius: radio,
               boxShadow: "0 30px 90px rgba(0, 0, 0, 0.55)",
             }}
             aria-hidden="true"
@@ -227,7 +258,7 @@ const ScrollExpandMedia = ({
                   alt=""
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 95vw, 1600px"
+                  sizes="(max-width: 768px) 100vw, 1600px"
                   priority={i === 0}
                 />
               </motion.div>
