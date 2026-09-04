@@ -179,29 +179,33 @@ cómo sustituir cualquiera.
 
 ## El héroe: qué se cambió de la plantilla
 
-`components/ui/scroll-expansion-hero.tsx` parte del componente de referencia y
-conserva su API. Cambios:
+`components/ui/scroll-expansion-hero.tsx` parte del componente de referencia,
+pero ya no comparte su mecánica. Cambios:
 
+- **Va atado al scroll real, y por eso es reversible.** La sección ocupa un
+  carril de 200vh con un bloque `sticky` de una pantalla dentro; el progreso sale
+  de `useScroll`. Al bajar, la foto crece; al subir, se encoge por el mismo
+  camino. La plantilla original interceptaba la rueda y abría la foto *de una vez
+  y para siempre*: al volver arriba se quedaba expandida, tapando el comedor.
+- **Sin secuestro del scroll.** Ni listeners de rueda con `passive: false`, ni
+  `overflow: hidden` sobre el documento, ni el parche para que los enlaces del
+  menú siguieran funcionando con la página bloqueada: nada de eso hace falta si
+  el navegador scrollea como siempre. Se fue con ello la mitad del componente.
+- **Las fotos del centro se van turnando** con un fundido de 1,2 s. La saliente
+  se queda opaca por debajo hasta que la entrante está del todo puesta —si se
+  cruzaran a media opacidad, el fondo oscuro se colaría entre las dos y la
+  tarjeta parpadearía en cada relevo—, y se suelta con `onAnimationComplete`, no
+  con un temporizador: si el fundido se queda a medias (pestaña en segundo
+  plano), soltarla por reloj dejaría la tarjeta en blanco.
+- **El relevo se para mientras la pestaña está oculta**, que es cuando el
+  navegador congela el pintado.
 - **Colores** atados a los tokens de la casa, en vez del `blue-200` de la demo.
-- **`mediaSrc` y `bgImageSrc` aceptan imports estáticos**, así Next conoce el
-  tamaño real de cada foto, genera el `srcset` y el desenfoque de carga, y no hay
-  saltos de maquetación.
-- **El bloqueo de scroll usa `overflow: hidden`** en lugar de devolver la página
-  a 0 en cada evento de scroll. El truco original pelea con el
-  `scroll-behavior: smooth` de la hoja de estilos y deja la página atascada a
-  medio camino.
-- **Los listeners de rueda y gesto se retiran al abrirse el héroe.** En el
-  original quedaban puestos para siempre con `passive: false`, lo que obliga al
-  navegador a resolver en el hilo principal cada scroll del resto de la página.
-- **Con el héroe cerrado, los enlaces del menú funcionan.** Antes no llevaban a
-  ninguna parte, porque la página estaba bloqueada.
-- **Apertura de ida:** volver arriba ya no vuelve a bloquear.
-- **`prefers-reduced-motion`:** quien lo tenga activado ve el héroe ya abierto.
-- **Teclado:** flechas, AvPág, Espacio, Fin y el propio reclamo abren el héroe.
-- **`<h1>` en vez de `<h2>`.**
-
-También se quitó el `overflow-x: hidden` del `body`: convertía el documento en su
-propio contenedor de scroll y rompía los `position: sticky` de la carta y del mapa.
+- **Las fotos son imports estáticos**, así Next conoce el tamaño real de cada
+  una, genera el `srcset` y el desenfoque de carga, y no hay saltos de
+  maquetación.
+- **`prefers-reduced-motion`:** quien lo tenga activado ve el héroe ya abierto,
+  con una sola foto y sin carril de scroll.
+- **Se cayó la rama de vídeo** de la plantilla: no se usaba.
 
 ## SEO y accesibilidad
 

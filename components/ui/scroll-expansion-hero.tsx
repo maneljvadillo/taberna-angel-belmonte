@@ -74,6 +74,7 @@ const ScrollExpandMedia = ({
   const [esMovil, setEsMovil] = useState(false);
   const [indice, setIndice] = useState(0);
   const [saliente, setSaliente] = useState<number | null>(null);
+  const anteriorRef = useRef(0);
 
   useEffect(() => {
     const comprobar = () => setEsMovil(window.innerWidth < 768);
@@ -82,28 +83,50 @@ const ScrollExpandMedia = ({
     return () => window.removeEventListener("resize", comprobar);
   }, []);
 
-  // Turno de fotos. Quien pide menos movimiento se queda con la primera.
+  /**
+   * Turno de fotos. Quien pide menos movimiento se queda con la primera.
+   *
+   * En segundo plano el reloj se para: el navegador congela el pintado de las
+   * pestañas ocultas, así que un relevo lanzado ahí se quedaría a medias.
+   */
   useEffect(() => {
     if (reducedMotion || fotos.length < 2) return;
 
-    const id = setInterval(() => {
-      setIndice((i) => {
-        setSaliente(i);
-        return (i + 1) % fotos.length;
-      });
-    }, intervaloFotos);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setInterval> | undefined;
+
+    const arrancar = () => {
+      id ??= setInterval(
+        () => setIndice((i) => (i + 1) % fotos.length),
+        intervaloFotos
+      );
+    };
+
+    const parar = () => {
+      clearInterval(id);
+      id = undefined;
+    };
+
+    const alCambiarVisibilidad = () =>
+      document.hidden ? parar() : arrancar();
+
+    alCambiarVisibilidad();
+    document.addEventListener("visibilitychange", alCambiarVisibilidad);
+
+    return () => {
+      parar();
+      document.removeEventListener("visibilitychange", alCambiarVisibilidad);
+    };
   }, [reducedMotion, fotos.length, intervaloFotos]);
 
-  // La foto que se va se queda opaca —y por debajo— hasta que la nueva ha
-  // terminado de entrar. Si ambas se cruzaran a media opacidad, el fondo oscuro
-  // se colaría entre las dos y la tarjeta parpadearía en cada relevo.
+  // La foto que se va se queda opaca —y por debajo— hasta que la nueva termina
+  // de entrar. Si ambas se cruzaran a media opacidad, el fondo oscuro se
+  // colaría entre las dos y la tarjeta parpadearía en cada relevo.
   useEffect(() => {
-    if (saliente === null) return;
+    if (anteriorRef.current === indice) return;
 
-    const id = setTimeout(() => setSaliente(null), FUNDIDO * 1000);
-    return () => clearTimeout(id);
-  }, [saliente]);
+    setSaliente(anteriorRef.current);
+    anteriorRef.current = indice;
+  }, [indice]);
 
   const { scrollYProgress } = useScroll({
     target: carrilRef,
@@ -191,6 +214,12 @@ const ScrollExpandMedia = ({
                 transition={{
                   duration: i === indice ? FUNDIDO : 0,
                   ease: "easeInOut",
+                }}
+                // Se suelta a la saliente cuando la nueva está opaca de verdad,
+                // no a los FUNDIDO segundos de reloj: si el fundido se queda a
+                // medias, soltarla por tiempo dejaría la tarjeta en blanco.
+                onAnimationComplete={() => {
+                  if (i === indice) setSaliente(null);
                 }}
               >
                 <Image
