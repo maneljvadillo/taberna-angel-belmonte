@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Sistema de diseño — Taberna Ángel Belmonte
+
+   La casa es una taberna de noche: madera oscura, mantel claro, latón y brasa.
+   Toda la web parte de ese fondo oscuro, así el héroe (que ya es una foto
+   nocturna) no rompe con el resto de secciones y la lectura es coherente de
+   arriba abajo.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* Fondos. El verde muy oscuro viene del comedor de la casa: paredes verdes,
+     vigas de pino y mantel blanco. Sobre este fondo, sus fotos —loza blanca,
+     manteles— destacan sin que el sitio parezca de otro restaurante. */
+  --color-ink: #0b1410;
+  --color-ink-raised: #111c16;
+  --color-ink-veil: #18271f;
+
+  /* Texto */
+  --color-cream: #f4f1e8;
+  --color-sand: #a9b3a6;
+
+  /* Acentos: latón de los apliques del comedor; brasa, muy puntual */
+  --color-brass: #c9a063;
+  --color-ember: #9e3b22;
+
+  --color-line: #22322a;
+
+  --font-display: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* El header fijo no debe tapar la sección a la que se salta. */
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Nada de `overflow-x: hidden` en html/body: convierte el documento en su
+     propio contenedor de scroll y deja de funcionar `position: sticky` en los
+     descendientes (la imagen de la carta y el mapa lo usan). El desbordamiento
+     horizontal se recorta en el bloque que lo produce —el héroe— y no aquí. */
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Ancho de lectura común a todas las secciones. */
+  .contenedor {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .contenedor {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* Antetítulo de sección: versalita espaciada en latón. */
+  .antetitulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-brass);
+  }
+
+  .antetitulo::before {
+    content: "";
+    width: 1.75rem;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.55;
+  }
+
+  /* Titular editorial: serif ligera y muy compacta. */
+  .titular {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .parrafo {
+    color: color-mix(in srgb, var(--color-cream) 72%, transparent);
+    line-height: 1.75;
+    text-wrap: pretty;
+  }
+}
+
+@layer utilities {
+  /* Grano de película muy leve sobre los fondos planos, para que el negro no
+     se vea digital en pantallas grandes. */
+  .grano::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Oculto en pantalla, disponible para lectores de pantalla. */
+  .solo-lectores {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
